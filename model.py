@@ -17,10 +17,15 @@ class modelTemplate():
         finalLayer = Dense(classNum, activation = activation)(input)
         return finalLayer
 
-    def generatePretrained(self, input, modelType):
+    def generatePretrained(self, input, modelType, weights = 'imagenet', optimizer = Adam(lr=0.001), loss = 'categorical_crossentropy', metrics = 'accuracy'):
         modelType = self.getPretrainedName(modelType)
-        model = modelType(include_top=False, weights='imagenet', input_tensor=None, input_shape=(input[0], input[1], 3))
-        model.compile(optimizer=Adam(lr=0.001),loss='categorical_crossentropy',metrics=['accuracy'])
+        model = modelType(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
+        model.compile(optimizer = optimizer, loss = loss, metrics = [metrics])
+        return model
+
+    def modelTrain(self, input, output, optimizer = Adam(lr=0.001), loss = 'categorical_crossentropy', metrics = 'accuracy'):
+        model = Model(inputs = input, outputs = output)
+        model.compile(optimizer = optimizer, loss = loss, metrics = [metrics])
         return model
 
 class VGG16Custom(modelTemplate):
@@ -52,8 +57,7 @@ class VGG16Custom(modelTemplate):
         x = self.multiDense(x, activation)
         output = self.finalDense(x, classNum, 'softmax')
 
-        model = Model(inputs = input, outputs = output, name='vgg16')
-        model.compile(optimizer=Adam(lr=0.001),loss='categorical_crossentropy',metrics=['accuracy'])
+        model = self.modelTrain(input, output)
         return model
 
 class ResNetCustom(modelTemplate):
@@ -83,8 +87,7 @@ class ResNetCustom(modelTemplate):
         x = Flatten()(x)
         output = self.finalDense(x, classNum, 'softmax')
 
-        model = Model(inputs = input, outputs = output, name='resnet50')
-        model.compile(optimizer=Adam(lr=0.001),loss='categorical_crossentropy',metrics=['accuracy'])
+        model = self.modelTrain(input, output)
         return model
 
 # class EfficientNetCustom(modelTemplate):
@@ -100,4 +103,4 @@ if __name__ == '__main__':
     # model = model.generatePretrained([256,256,3], ResNet50)
     model = model.generateModel(Input(input_size), 64, 7, [3, 4, 6, 3])
 
-    model.summary()   
+    model.summary()
