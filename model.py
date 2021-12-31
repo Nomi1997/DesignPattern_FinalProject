@@ -1,35 +1,38 @@
 from tensorflow.keras.optimizers import Adam
 from tensorflow.python.keras.applications.vgg16 import VGG16
 from tensorflow.python.keras.applications.resnet import ResNet50
+from tensorflow.python.keras.applications.efficientnet import EfficientNetB0
 from tensorflow.python.keras.layers import *
 from tensorflow.keras.models import *
 
 class modelTemplate():
-    def getPretrainedName(self, modelName):
+    def getPretrainedName(self, input, modelName, weights = 'imagenet'):
         if modelName == "resnet50":
-            modelName = ResNet50
+            getModel = ResNet50(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
         elif modelName == "vgg16":
-            modelName = VGG16
-        
-        return modelName
+            getModel = VGG16(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
+        elif modelName == 'efnb0':
+            getModel = EfficientNetB0(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
+        else:
+            print("please enter again.")
+            raise 
+        return getModel
 
     def finalDense(self, input, classNum, activation):
         finalLayer = Dense(classNum, activation = activation)(input)
         return finalLayer
 
-    def generatePretrained(self, input, modelType, weights = 'imagenet', optimizer = Adam(lr=0.001), loss = 'categorical_crossentropy', metrics = 'accuracy'):
-        modelType = self.getPretrainedName(modelType)
-        model = modelType(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
+    def generatePretrained(self, input, modelType, optimizer = Adam(lr=0.001), loss = 'sparse_categorical_crossentropy', metrics = 'accuracy'):
+        model = self.getPretrainedName(input, modelType)
         model.compile(optimizer = optimizer, loss = loss, metrics = [metrics])
         return model
 
-    def modelTrain(self, input, output, optimizer = Adam(lr=0.001), loss = 'categorical_crossentropy', metrics = 'accuracy'):
+    def modelTrain(self, input, output, optimizer = Adam(lr=0.001), loss = 'sparse_categorical_crossentropy', metrics = 'accuracy'):
         model = Model(inputs = input, outputs = output)
         model.compile(optimizer = optimizer, loss = loss, metrics = [metrics])
         return model
 
 class VGG16Custom(modelTemplate):
-
     def doubleConv2D(self, input, channel, kernel = (3, 3), stride = (1, 1), activation = 'relu', padding = 'same'):
         x = Conv2D(channel, kernel, stride, padding, activation = activation)(input)
         x = Conv2D(channel, kernel, stride, padding, activation = activation)(x)
@@ -76,7 +79,7 @@ class ResNetCustom(modelTemplate):
             input = self.bottleNeck(input, channel)
         return input
 
-    def generateModel(self, input, channel, classNum, layerNums):
+    def generateModel(self, input, channel, classNum, layerNums = [3, 4, 6, 3]):
         x = Conv2D(channel, 1, strides = (1, 1) , padding = 'same', activation = 'relu')(input)
         x = BatchNormalization()(x)
         x = self.layerState(x, channel, layerNums[0])
@@ -93,14 +96,14 @@ class ResNetCustom(modelTemplate):
 # class EfficientNetCustom(modelTemplate):
 
 if __name__ == '__main__':
-    input_size = (256,256,3)
+    input_size = [256,256,3]
 
     # model = VGG16Custom()
     # model = model.generatePretrained([256,256,3], VGG16)
     # model = model.generateModel(Input(input_size), 64, 7)
 
     model = ResNetCustom()
-    # model = model.generatePretrained([256,256,3], ResNet50)
-    model = model.generateModel(Input(input_size), 64, 7, [3, 4, 6, 3])
+    model = model.generatePretrained(input_size, ResNet50)
+    # model = model.generateModel(Input(input_size), 64, 7, [3, 4, 6, 3])
 
     model.summary()
