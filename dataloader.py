@@ -42,4 +42,4 @@ if __name__ == '__main__':
 
     img_list, lab_list = Dataset_loader(image_dir, metaDataCSVInfo[['image_id', 'dx']], 224)
     # train_inputs, train_label, val_inputs, val_label = split_Train_Validation(img_list, lab_list, 0.8)
-    train_inputs, train_label, val_inputs, val_label = train_test_split(img_list, lab_list, test_size = 0.2, random_state = 42)
+    train_inputs, val_inputs, train_label, val_label = train_test_split(img_list, lab_list, test_size = 0.2, random_state = 42)
