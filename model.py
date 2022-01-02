@@ -5,7 +5,7 @@ from tensorflow.python.keras.applications.efficientnet import EfficientNetB0
 from tensorflow.python.keras.layers import *
 from tensorflow.keras.models import *
 
-class modelTemplate():
+class ModelTemplate():
     def getPretrainedName(self, input, modelName, weights = 'imagenet'):
         if modelName == "resnet50":
             getModel = ResNet50(include_top = False, weights = weights, input_tensor = None, input_shape = (input[0], input[1], 3))
@@ -32,7 +32,7 @@ class modelTemplate():
         model.compile(optimizer = optimizer, loss = loss, metrics = [metrics])
         return model
 
-class VGG16Custom(modelTemplate):
+class VGG16Custom(ModelTemplate):
     def doubleConv2D(self, input, channel, kernel = (3, 3), stride = (1, 1), activation = 'relu', padding = 'same'):
         x = Conv2D(channel, kernel, stride, padding, activation = activation)(input)
         x = Conv2D(channel, kernel, stride, padding, activation = activation)(x)
@@ -63,7 +63,7 @@ class VGG16Custom(modelTemplate):
         model = self.modelTrain(input, output)
         return model
 
-class ResNetCustom(modelTemplate):
+class ResNetCustom(ModelTemplate):
     def bottleNeck(self, input, channel, kernel = (3, 3), strides = (1, 1), activation = 'relu', padding = 'same'):
         x = Conv2D(channel, 1, strides, padding, activation = activation)(input)
         shortcut = x

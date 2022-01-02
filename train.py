@@ -51,7 +51,7 @@ class Train():
         
         input_size = [self.resize, self.resize, 3]
         if self.pretraind:
-            getModel = modelTemplate()
+            getModel = ModelTemplate()
             model = getModel.generatePretrained(input_size, self.modelName)
         else:
             if self.modelName == "resnet50":
