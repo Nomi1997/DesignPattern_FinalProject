@@ -41,7 +41,7 @@ class Train():
         return metaDataCSVInfo[['image_id', 'dx']]
 
     def getData(self, image_dir, label_data, resize, test_radio, SEED):
-        img_list, lab_list = Dataset_loader(image_dir, label_data, resize)
+        img_list, lab_list = Dataloader.Dataset_loader(image_dir, label_data, resize)
         train_inputs, val_inputs, train_label, val_label = train_test_split(img_list, lab_list, test_size = test_radio, random_state = SEED)
 
         return train_inputs, val_inputs, train_label, val_label
